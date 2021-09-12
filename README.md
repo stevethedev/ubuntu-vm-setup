@@ -62,5 +62,5 @@ of configuring a VM. This includes installing programming languages,
 configuring Git, setting up SSH support, etc.
 
 ```bash
-curl 'https://raw.githubusercontent.com/stevethedev/ubuntu-vm-setup/master/setup-vm.sh' -o- | bash
+wget -q -O - 'https://raw.githubusercontent.com/stevethedev/ubuntu-vm-setup/master/setup-vm.sh' | bash
 ```

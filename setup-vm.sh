@@ -609,8 +609,8 @@ install_nvm() {
 
   echo "Installing NVM..."
   sudo apt install -y jq
-  LATEST_TAG=$(curl -s https://api.github.com/repos/nvm-sh/nvm/tags | jq -r '.[0].name')
-  curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/$LATEST_TAG/install.sh" | bash
+  LATEST_TAG=$(wget -q -O - 'https://api.github.com/repos/nvm-sh/nvm/tags' | jq -r '.[0].name')
+  wget -q -O - "https://raw.githubusercontent.com/nvm-sh/nvm/$LATEST_TAG/install.sh" | bash
 }
 
 install_rust() {
@@ -620,7 +620,7 @@ install_rust() {
   fi
 
   echo "Installing Rust-Up..."
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  wget --https-only --secure-protocol='TLSv1_2' -q -O - 'https://sh.rustup.rs' | sh
 }
 
 install_gvm() {
@@ -630,7 +630,7 @@ install_gvm() {
   fi
 
   echo "Installing GVM..."
-  bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)
+  wget -q -O - 'https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer' | bash
 }
 
 install_git() {
