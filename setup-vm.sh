@@ -233,8 +233,7 @@ lang_menu_text() {
   fi
 
   if [[ ${#L[@]} -gt 0 ]]; then
-    L="$(printf ", %s" "${L[@]}")"
-    echo "Languages: ${L:2}"
+    echo "Languages: $(printf ", %s" "${L[@]}" | cut -c 3-)"
   else
     echo 'Languages: <none>'
   fi
