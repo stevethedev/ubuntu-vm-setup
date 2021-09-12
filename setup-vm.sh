@@ -727,6 +727,8 @@ main() {
   install_nvm
   install_gvm
   install_rust
+
+  echo "Installation complete; a reboot may be required"
 }
 
 main
