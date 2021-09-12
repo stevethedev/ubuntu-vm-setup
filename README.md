@@ -36,11 +36,10 @@ Once the install script is done, run the following script to edit the
 XRDP configuration to support Hyper-V on Windows 10:
 
 ```bash
-sudo sed \
-  -i \
-  -e 's/^port=.*$/port=vsock:\/\/-1:3389/' \
-  -e 's/^use_vsock=.*$/use_vsock=false/' \
-  '/etc/xrdp/xrdp.ini'
+sudo apt install -y crudini
+sudo cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bak
+sudo crudini --set /etc/xrdp/xrdp.ini Globals port 'vsock://-1:3389'
+sudo crudini --set /etc/xrdp/xrdp.ini Globals use_vsock false
 ```
 
 ### Configure Windows to connect
