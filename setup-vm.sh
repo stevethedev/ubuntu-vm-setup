@@ -640,7 +640,7 @@ install_nvm() {
   sudo apt install -y jq
   LATEST_TAG=$(wget -q -O - 'https://api.github.com/repos/nvm-sh/nvm/tags' | jq -r '.[0].name')
   wget -q -O - "https://raw.githubusercontent.com/nvm-sh/nvm/$LATEST_TAG/install.sh" | bash
-  bash -c "nvm install $_NVM_NODE_VERSION"
+  bash -i -c "nvm install '$_NVM_NODE_VERSION'"
 }
 
 install_rust() {
@@ -664,8 +664,8 @@ install_gvm() {
   echo "Installing GVM..."
   sudo apt install -y binutils make gcc curl bison
   wget -q -O - 'https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer' | bash
-  GOLANG_VERSION="$(gvm listall | awk '{print $1}' | grep -E '^go' | grep -v 'beta' | grep "$_GVM_GOLANG_VERSION" | tail -n1)"
-  gvm install "$GOLANG_VERSION" -B
+  GOLANG_VERSION="$(bash -i -c 'gvm listall' | awk '{print $1}' | grep -E '^go' | grep -v 'beta' | grep "$_GVM_GOLANG_VERSION" | tail -n1)"
+  bash -i -c "gvm install '$GOLANG_VERSION' -B"
 }
 
 install_git() {
