@@ -203,6 +203,43 @@ find_gpg_email() {
   printf -v "$VAR_NAME" '%s' "$FOUND_KEY"
 }
 
+# Echoes the menu-text for the Git option
+git_menu_text() {
+    if [[ "$_USE_GIT" == '1' ]]; then
+      if [[ "$_USE_GPG" == '1' ]] && [[ "$_GPG_AUTO_SIGN_COMMITS" == '1' ]]; then
+        echo 'Use Git + GPG Autosign'
+      else
+        echo 'Use Git'
+      fi
+    else
+      echo 'Skip Git'
+    fi
+}
+
+# Echoes the menu-text for the Languages option
+lang_menu_text() {
+  local L=()
+
+  if [[ "$_USE_GVM" == '1' ]]; then
+    L+=("Go ($_GVM_GOLANG_VERSION)")
+  fi
+
+  if [[ "$_USE_RUST" == '1' ]]; then
+    L+=("Rust (latest)")
+  fi
+
+  if [[ "$_USE_NVM" == '1' ]]; then
+    L+=("Node ($_NVM_NODE_VERSION)")
+  fi
+
+  if [[ ${#L[@]} -gt 0 ]]; then
+    L="$(printf ", %s" "${L[@]}")"
+    echo "Languages: ${L:2}"
+  else
+    echo 'Languages: <none>'
+  fi
+}
+
 ###############################################################################
 #                             Interface Functions                             #
 ###############################################################################
@@ -215,22 +252,12 @@ main_menu() {
 
   while true; do
     OPTIONS=()
-    OPTIONS+=('1)' "User: $_NAME <$_EMAIL>")
-    OPTIONS+=('2)' "$(iftext "$_USE_SSH" "SSH: $_SSH_TOKEN" 'Skip SSH')")
-
-    if [[ "$_USE_GIT" == '1' ]]; then
-      if [[ "$_USE_GPG" == '1' ]] && [[ "$_GPG_AUTO_SIGN_COMMITS" == '1' ]]; then
-        OPTIONS+=('3)' 'Use Git + GPG Autosign')
-      else
-        OPTIONS+=('3)' 'Use Git')
-      fi
-    else
-      OPTIONS+=('3)' 'Skip Git')
-    fi
-
-    OPTIONS+=('4)' "$(iftext "$_USE_GPG" 'Use GPG' 'Skip GPG')")
-    OPTIONS+=('5)' 'Languages')
-    OPTIONS+=('0)' 'Continue to Installation')
+    OPTIONS+=('u)' "User: $_NAME <$_EMAIL>")
+    OPTIONS+=('s)' "$(iftext "$_USE_SSH" "SSH: $_SSH_TOKEN" 'Skip SSH')")
+    OPTIONS+=('g)' "$(git_menu_text)")
+    OPTIONS+=('p)' "$(iftext "$_USE_GPG" 'Use GPG' 'Skip GPG')")
+    OPTIONS+=('l)' "$(lang_menu_text)")
+    OPTIONS+=('x)' 'Continue to Installation')
 
     CHOICE=$(
       whiptail \
@@ -248,22 +275,22 @@ main_menu() {
     fi
 
     case "$CHOICE" in
-    '1)')
+    'u)')
       user_menu
       ;;
-    '2)')
+    's)')
       ssh_menu
       ;;
-    '3)')
+    'g)')
       git_menu
       ;;
-    '4)')
+    'p)')
       gpg_menu
       ;;
-    '5)')
+    'l)')
       lang_menu
       ;;
-    '0)')
+    'x)')
       break
       ;;
     esac
@@ -278,8 +305,8 @@ user_menu() {
 
   while true; do
     OPTIONS=()
-    OPTIONS+=('1)' "Name: $_NAME")
-    OPTIONS+=('2)' "Email: $_EMAIL")
+    OPTIONS+=('n)' "Name: $_NAME")
+    OPTIONS+=('e)' "Email: $_EMAIL")
 
     CHOICE=$(
       whiptail \
@@ -296,10 +323,10 @@ user_menu() {
     fi
 
     case "$CHOICE" in
-    '1)')
+    'n)')
       text_input _NAME 'Configure User' 'What is your real name?'
       ;;
-    '2)')
+    'e)')
       text_input _EMAIL 'Configure User' 'What is your email?'
       ;;
     esac
@@ -316,13 +343,13 @@ ssh_menu() {
 
   while true; do
     OPTIONS=()
-    OPTIONS+=('1)' "$(checkmark "$_USE_SSH") Enable SSH installation & configuration")
+    OPTIONS+=('e)' "$(checkmark "$_USE_SSH") Enable SSH installation & configuration")
 
     if [[ "$_USE_SSH" == '1' ]]; then
-      OPTIONS+=('2)' "SSH Token: $_SSH_TOKEN")
+      OPTIONS+=('t)' "SSH Token: $_SSH_TOKEN")
 
       if [[ -f "$_SSH_TOKEN" ]]; then
-        OPTIONS+=('3)' "$(checkmark "$_SSH_TOKEN_OVERWRITE") Overwrite existing SSH token")
+        OPTIONS+=('o)' "$(checkmark "$_SSH_TOKEN_OVERWRITE") Overwrite existing SSH token")
       fi
     fi
 
@@ -341,13 +368,13 @@ ssh_menu() {
     fi
 
     case "$CHOICE" in
-    '1)')
+    'e)')
       toggle _USE_SSH
       ;;
-    '2)')
+    't)')
       text_input _SSH_TOKEN 'Configure SSH' 'What is the SSH token file-path?'
       ;;
-    '3)')
+    'o)')
       toggle _SSH_TOKEN_OVERWRITE
       ;;
     esac
@@ -362,11 +389,11 @@ git_menu() {
 
   while true; do
     OPTIONS=()
-    OPTIONS+=('1)' "$(checkmark "$_USE_GIT") Install and configure Git")
+    OPTIONS+=('e)' "$(checkmark "$_USE_GIT") Install and configure Git")
 
     if [[ "$_USE_GIT" == '1' ]]; then
       if [[ "$_USE_GPG" == '1' ]]; then
-        OPTIONS+=('2)' "$(checkmark "$_GPG_AUTO_SIGN_COMMITS") Use GPG to auto-sign Git Commits")
+        OPTIONS+=('s)' "$(checkmark "$_GPG_AUTO_SIGN_COMMITS") Use GPG to auto-sign Git Commits")
       fi
     fi
 
@@ -385,10 +412,10 @@ git_menu() {
     fi
 
     case "$CHOICE" in
-    '1)')
+    'e)')
       toggle _USE_GIT
       ;;
-    '2)')
+    's)')
       toggle _GPG_AUTO_SIGN_COMMITS
       ;;
     esac
@@ -403,17 +430,17 @@ gpg_menu() {
 
   while true; do
     OPTIONS=()
-    OPTIONS+=('1)' "$(checkmark "$_USE_GPG") Install and configure GPG")
+    OPTIONS+=('e)' "$(checkmark "$_USE_GPG") Install and configure GPG")
 
     if [[ "$_USE_GPG" == '1' ]]; then
-      OPTIONS+=('2)' "Output Pubkey: $_GPG_KEY_FILE")
+      OPTIONS+=('o)' "Output Pubkey: $_GPG_KEY_FILE")
 
       if [[ "$_USE_GIT" == '1' ]]; then
-        OPTIONS+=('3)' "$(checkmark "$_GPG_AUTO_SIGN_COMMITS") Auto-sign Git commits")
+        OPTIONS+=('s)' "$(checkmark "$_GPG_AUTO_SIGN_COMMITS") Auto-sign Git commits")
       fi
 
       if [[ "$_GPG_KEY" == '' ]]; then
-        OPTIONS+=('4)' "Password (${#_GPG_PASSPHRASE} characters)")
+        OPTIONS+=('p)' "Password (${#_GPG_PASSPHRASE} characters)")
       fi
     fi
 
@@ -432,16 +459,16 @@ gpg_menu() {
     fi
 
     case "$CHOICE" in
-    '1)')
+    'e)')
       toggle _USE_GPG
       ;;
-    '2)')
+    'o)')
       text_input _GPG_KEY_FILE 'GPG Pubkey' 'Where do you ant to save the exported GPG token public key?'
       ;;
-    '3)')
+    's)')
       toggle _GPG_AUTO_SIGN_COMMITS
       ;;
-    '4)')
+    'p)')
       password_input _GPG_PASSPHRASE 'Set the GPG Passphrase (or leave blank for no passphrase)'
       ;;
     esac
@@ -536,9 +563,11 @@ _GPG_AUTO_SIGN_COMMITS='1'
 
 # Indicates whether to install the Golang Version Manager
 _USE_GVM='0'
+_GVM_GOLANG_VERSION='go1'
 
 # Indicates whether to install the Node Version Manager
 _USE_NVM='0'
+_NVM_NODE_VERSION='stable'
 
 # Indicates whether to install Rustup
 _USE_RUST='0'
@@ -611,6 +640,7 @@ install_nvm() {
   sudo apt install -y jq
   LATEST_TAG=$(wget -q -O - 'https://api.github.com/repos/nvm-sh/nvm/tags' | jq -r '.[0].name')
   wget -q -O - "https://raw.githubusercontent.com/nvm-sh/nvm/$LATEST_TAG/install.sh" | bash
+  bash -c "nvm install $_NVM_NODE_VERSION"
 }
 
 install_rust() {
@@ -624,13 +654,18 @@ install_rust() {
 }
 
 install_gvm() {
+  local GOLANG_VERSION
+
   if [[ "$_USE_GVM" != '1' ]]; then
     echo "Skipping GVM installation..."
     return 1
   fi
 
   echo "Installing GVM..."
+  sudo apt install -y binutils make gcc curl bison
   wget -q -O - 'https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer' | bash
+  GOLANG_VERSION="$(gvm listall | awk '{print $1}' | grep -E '^go' | grep -v 'beta' | grep "$_GVM_GOLANG_VERSION" | tail -n1)"
+  gvm install "$GOLANG_VERSION" -B
 }
 
 install_git() {
