@@ -205,15 +205,15 @@ find_gpg_email() {
 
 # Echoes the menu-text for the Git option
 git_menu_text() {
-    if [[ "$_USE_GIT" == '1' ]]; then
-      if [[ "$_USE_GPG" == '1' ]] && [[ "$_GPG_AUTO_SIGN_COMMITS" == '1' ]]; then
-        echo 'Use Git + GPG Autosign'
-      else
-        echo 'Use Git'
-      fi
+  if [[ "$_USE_GIT" == '1' ]]; then
+    if [[ "$_USE_GPG" == '1' ]] && [[ "$_GPG_AUTO_SIGN_COMMITS" == '1' ]]; then
+      echo 'Use Git + GPG Autosign'
     else
-      echo 'Skip Git'
+      echo 'Use Git'
     fi
+  else
+    echo 'Skip Git'
+  fi
 }
 
 # Echoes the menu-text for the Languages option
@@ -713,16 +713,20 @@ install_gpg() {
 #                           Application Entry Point                           #
 ###############################################################################
 
-main_menu
+main() {
+  main_menu
 
-if [[ $_DO_INSTALL -ne 1 ]]; then
-  echo 'Cancelled installation'
-  exit 1
-fi
+  if [[ $_DO_INSTALL -ne 1 ]]; then
+    echo 'Cancelled installation'
+    exit 1
+  fi
 
-install_ssh
-install_git
-install_gpg
-install_nvm
-install_gvm
-install_rust
+  install_ssh
+  install_git
+  install_gpg
+  install_nvm
+  install_gvm
+  install_rust
+}
+
+main
