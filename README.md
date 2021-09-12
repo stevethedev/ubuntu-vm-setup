@@ -58,4 +58,10 @@ be presented with the XRDP login screen.
 
 ## Additional configuration
 
-T
+There is a configuration helper that automates a lot of the boring parts
+of configuring a VM. This includes installing programming languages,
+configuring Git, setting up SSH support, etc.
+
+```bash
+curl 'https://raw.githubusercontent.com/stevethedev/ubuntu-vm-setup/master/setup-vm.sh' -o- | bash
+```
