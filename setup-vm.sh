@@ -611,8 +611,8 @@ install_ssh() {
   echo "$SSH_SCRIPT" >"$HOME/.bash_ssh"
 
   SSH_COMMAND='[[ -f "~/.bash_ssh" ]] && . "~/.bash_ssh"'
-  if grep -q "$SSH_COMMAND" "$HOME/.bashrc"; then
-    echo "$SSH_COMMAND" >>"$HOME/.bashrc"
+  if ! grep -q "$SSH_COMMAND" "$HOME/.bashrc"; then
+    echo "$SSH_COMMAND" >> "$HOME/.bashrc"
   fi
 
   if [[ -f "$_SSH_TOKEN" ]]; then
