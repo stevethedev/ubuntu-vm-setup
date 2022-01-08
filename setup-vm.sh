@@ -342,6 +342,7 @@ ssh_menu() {
 
   while true; do
     OPTIONS=()
+    OPTIONS+=('r)' "$(checkmark "$_USE_SSH_SERVER") Enable OpenSSH Server")
     OPTIONS+=('e)' "$(checkmark "$_USE_SSH") Enable SSH installation & configuration")
 
     if [[ "$_USE_SSH" == '1' ]]; then
@@ -367,6 +368,9 @@ ssh_menu() {
     fi
 
     case "$CHOICE" in
+    'r)')
+      toggle _USE_SSH_SERVER
+      ;;
     'e)')
       toggle _USE_SSH
       ;;
@@ -523,6 +527,9 @@ _DO_INSTALL=1
 # Indicates whether to install SSH support.
 _USE_SSH='1'
 
+# Indicates whether to install OpenSSH Server.
+_USE_SSH_SERVER='0'
+
 # Indicates the name of the SSH token.
 _SSH_TOKEN="$HOME/.ssh/id_ed25519"
 
@@ -627,6 +634,17 @@ install_ssh() {
   ssh-keygen -o -a 100 -t ed25519 -f "$_SSH_TOKEN" -q -N "" -C "$_NAME <$_EMAIL>"
 }
 
+install_openssh() {
+  if [[ "$_USE_SSH_SERVER" != '1' ]]; then
+    echo "Skipping OpenSSH Server..."
+    return 1
+  fi
+
+  echo "Installing OpenSSH Server..."
+  sudo apt install -y openssh-server
+  sudo ufw allow ssh
+}
+
 install_nvm() {
   local LATEST_TAG
 
@@ -721,6 +739,7 @@ main() {
   fi
 
   install_ssh
+  install_openssh
   install_git
   install_gpg
   install_nvm
