@@ -666,6 +666,9 @@ install_rust() {
     return 1
   fi
 
+  echo "Installing Build Essentials (required for Rust's compiler)"
+  sudo apt install build-essential
+
   echo "Installing Rust-Up..."
   wget --https-only --secure-protocol='TLSv1_2' -q -O - 'https://sh.rustup.rs' | sh
 }
